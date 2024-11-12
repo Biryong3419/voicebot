@@ -9,8 +9,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-if "api_key" not in st.session_state:
-    st.session_state.api_key = ""
+api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=api_key)
 
 if "chat" not in st.session_state:
     st.session_state.chat = []
@@ -21,7 +21,6 @@ if "messages" not in st.session_state:
 if "check_reset" not in st.session_state:
     st.session_state.check_reset = False
 
-
 ##### 기능 구현 함수 #####
 def STT(audio):
     # 파일 저장
@@ -30,7 +29,6 @@ def STT(audio):
     # 음원 파일 열기
     audio_file = open(filename, "rb")
     # Whisper 모델을 활용해 텍스트 얻기
-    client = OpenAI(api_key=st.session_state.api_key)
     transcript = client.audio.transcriptions.create(model="whisper-1", file=audio_file)
     audio_file.close()
     # 파일 삭제
@@ -39,9 +37,10 @@ def STT(audio):
 
 
 def ask_gpt(prompt, model):
-    client = OpenAI(api_key=st.session_state.api_key)
     response = client.chat.completions.create(model=model, messages=prompt)
     return response.choices[0].message.content
+    # system_message = response["choices"][0]["message"]
+    # return system_message["content"]
 
 
 def TTS(response):
@@ -67,7 +66,7 @@ def TTS(response):
 ## 메인 함수 ##
 def main():
     st.set_page_config(
-        page_title="음성 비서 프로그램(241112v1)",
+        page_title="음성 비서 프로그램",
         page_icon="🇰🇷",
         layout="wide"
     )
@@ -90,13 +89,10 @@ def main():
 
     # 사이드바 생성
     with st.sidebar:
-        # Open AI API 키 입력받기
-        st.session_state.api_key = st.text_input(label="OPENAI API 키", placeholder="Enter Your API Key", value="",
-                                                 type="password")
-        st.markdown("")
         # GPT 모델을 선택하기 위한 라디오 버튼 생성
         model = st.selectbox(label="GPT 모델", options=['gpt-4', 'gpt-3.5-turbo'])
         st.markdown("")
+
         # 리셋 버튼 생성
         if st.button(label="초기화", use_container_width=True):
             # 리셋 코드

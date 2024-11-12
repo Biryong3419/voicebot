@@ -149,7 +149,7 @@ def main():
                     st.write("")
             
             # gTTS 를 활용하여 음성 파일 생성 및 재생
-            TTS(response)
+            # TTS(response)
         else:
             st.session_state["check_reset"] = False
 
